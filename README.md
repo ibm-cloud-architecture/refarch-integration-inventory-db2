@@ -10,4 +10,4 @@ The following steps can be done manually to create a VM with REDHAT
 
 
 # Scripts
-The folder db-scripts includes shell scripts to 
+The folder db-scripts includes shell scripts to create the INVDB and populate it
