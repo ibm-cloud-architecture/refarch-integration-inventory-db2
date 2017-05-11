@@ -2,10 +2,13 @@ create table items
 (
  id INTEGER NOT NULL,
  name VARCHAR(100) NOT NULL,
- description VARCHAR(1000) NOT NULL,
+ description VARCHAR(1500) NOT NULL,
  price DECIMAL(8,2) NOT NULL,
- img_alt VARCHAR(75),
- img VARCHAR(50) NOT NULL,
- quantity DECIMAL
+ img_alt VARCHAR(100),
+ img VARCHAR(100) NOT NULL,
+ quantity DECIMAL,
+ CREATIONDATE TIMESTAMP,
+ UPDATEDATE TIMESTAMP
+ 
 );
 COMMIT;
