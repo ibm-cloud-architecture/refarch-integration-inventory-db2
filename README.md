@@ -5,16 +5,20 @@ This project is part of the 'IBM Integration Reference Architecture' suite, avai
 This project supports scripts to create DB2 inventory database and load it with 12 items.
 
 ## DB2 Installation
-The following steps can be done manually to create a VM with REDHAT
-* Create a vm machine for a REDHAT OS
-* Configure the virtual machine to start on redhat .iso file (configure DVD to point to .iso file)
-* Configure REDHAT to use
-* Create an admin user, and login
-* Download the free version of DB2 Express C from [here](https://www-01.ibm.com/marketing/iwm/iwm/web/download.do?source=swg-db2expressc)
-* Unzip the gz file under /home/admin/IBM/expc
-* Login as root goes to /home/admin/IBM/expc and execute ./db2setup the wizard creates two users db2inst1 and db2fenc1
-* Once installation is done login as db2inst1 and then validate your installation files, instance, and database functionality, run the Validation Tool, /opt/ibm/db2/V11.1/bin/db2val
-* Create the DB2 INVDB. When a database is created, there are several objects created by default: table spaces, tables, a buffer pool and log files.
+The following steps can be done manually to create a VM with REDHAT. We are using vmware vSphere center.
+* Create a vm machine for a REDHAT 7 (67 bits) OS using ESXi 5.5  
+* Configure the virtual machine to start on RedHat .iso file (configure DVD to point to .iso file). Be sure to select connect at power on  
+![](docs/cd-drive.png)
+* Configure REDHAT: Attention spend time to go over each configuration items if not you may have to reinstall or the install will not complete.
+[See this note from RedHat](https://developers.redhat.com/products/rhel/hello-world/#fndtn-vmware_get-ready-for-software-development], in particular the Software Selection: Server with GUI in the Base Environment: Select the target destination disk that will map the one configured at the virtual machine settings.
+* Reboot and finalize the language and time settings.
+* Create an *admin* user
+* Once logged as *admin* on the newly operational OS, download the free version of DB2 Express v11 from [here](https://www-01.ibm.com/marketing/iwm/iwm/web/download.do?source=swg-db2expressc)
+* Unzip the gz file under **/home/admin/IBM/expc**
+* Login as root goes to **/home/admin/IBM/expc** and execute `./db2setup`. The wizard creates two users **db2inst1** and **db2fenc1**
+* Once installation is done login as **db2inst1** and then validate your installation files, instance, and database functionality, run the Validation Tool, `/opt/ibm/db2/V11.1/bin/db2val`
+
+When a database is created, there are several objects created by default: table spaces, tables, a buffer pool and log files.
  * Table space SYSCATSPACE contains the System Catalog tables.
  * Table space TEMPSPACE1 is used by DB2 when it needs additional space to perform some operations such as sorts.
  * Table space USERSPACE1 is normally used to store user database tables if there is no table space specified when creating a table
@@ -24,7 +28,10 @@ The following steps can be done manually to create a VM with REDHAT
  $ service firewalld stop
  $ systemctl disable firewalld
  ```
-
+* If not done already, clone this repository as you may need the INVDB scripts
+```
+git clone https://github.com/ibm-cloud-architecture/refarch-integration-inventory-db2.git
+```
 ## Scripts
 The folder db-scripts includes shell scripts to create the INVDB and populate it.
 ```
@@ -47,6 +54,16 @@ $ createDB.sh
 |db2 describe table items|See the structure of a table|
 |db2 insert into <tab_name>(col1,col2,...)  values(val1,val2,..)|Insert data to table|
 |db2 select id,name from items | select some columns and all rows for a given table|
+
+** Verify DB2 is accessible
+Using Eclipse DataBase Development perspective define a new connection using the jdbc driver which can be found in the [refarch-premsource-inventory-dal](https://github.com/ibm-cloud-architecture/refarch-integration-inventory-dal)/lib/db2jcc4.jar
+![Eclipse DB Connection](docs/db2-cx-eclipse.png)
+The parameters are:
+```
+jdbc:db2://172.16.254.23:50000/INVDB:retrieveMessagesFromServerOnGetMessage=true;
+```
+
+Also note that the testing project has code to test DB2 availability. See [Integration tests](https://github.com/ibm-cloud-architecture/refarch-integration-tests)
 
 ## DB2 Reference material for knowledge acquisition
 * [Free e-book](http://publib.boulder.ibm.com/epubs/pdf/dsncrn01.pdf)
