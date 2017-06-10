@@ -6,7 +6,7 @@ This project supports scripts to create DB2 inventory database and load it with 
 
 ## DB2 Installation
 The following steps can be done manually to create a VM with REDHAT. We are using vmware vSphere center.
-* Create a vm machine for a REDHAT 7 (67 bits) OS using ESXi 5.5  
+* Create a vm machine for a REDHAT 7 (64 bits) OS using ESXi 5.5  
 * Configure the virtual machine to start on RedHat .iso file (configure DVD to point to .iso file). Be sure to select connect at power on  
 ![](docs/cd-drive.png)
 * Configure REDHAT: Attention spend time to go over each configuration items if not you may have to reinstall or the install will not complete.
