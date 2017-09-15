@@ -1,11 +1,11 @@
 create table items
 (
  id INTEGER NOT NULL,
- name VARCHAR(100) NOT NULL,
- description VARCHAR(1500),
+ name VARCHAR(300) NOT NULL,
+ description VARCHAR(5000),
  price DECIMAL(8,2),
- img_alt VARCHAR(100),
- img VARCHAR(100),
+ img_alt VARCHAR(200),
+ img VARCHAR(200),
  quantity DECIMAL,
  CREATIONDATE TIMESTAMP,
  UPDATEDATE TIMESTAMP
