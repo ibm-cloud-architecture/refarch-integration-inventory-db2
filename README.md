@@ -65,6 +65,9 @@ Once connected you can perform some SQL query, update records, etc... Useful dur
 
 Also note that the testing project has code to test DB2 availability. See [Integration tests](https://github.com/ibm-cloud-architecture/refarch-integration-tests)
 
+## Update the DB schema
+It may be needed to adapt the schema by adding new columns to one table. To do so, start the DB2 CLI.
+
 ## DB2 Reference material for knowledge acquisition
 * [Free e-book](http://publib.boulder.ibm.com/epubs/pdf/dsncrn01.pdf)
 * [dw article](https://www.ibm.com/developerworks/data/newto/db2luw-getstarted.html)
