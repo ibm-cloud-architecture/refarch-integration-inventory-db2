@@ -8,7 +8,7 @@ create table items
  img VARCHAR(200),
  model VARCHAR(50),
  serialNumber VARCHAR(50),
- type VARCHAR(50),
+ producttype VARCHAR(50),
  CREATIONDATE TIMESTAMP,
  UPDATEDATE TIMESTAMP,
  PRIMARY KEY (id)
@@ -39,6 +39,6 @@ CREATE TABLE SUPPLIERS (
     zipcode VARCHAR(10), 
     PRIMARY KEY (id)) 
 );
-CREATE TABLE APP.supplier_delivers_item (SUPPLIERS_ID BIGINT, ITEMS_ID BIGINT) ;
+CREATE TABLE supplier_delivers_item (SUPPLIERS_ID INTEGER, ITEMS_ID INTEGER) ;
 
 COMMIT;

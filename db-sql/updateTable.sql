@@ -1,0 +1,1 @@
+CREATE TABLE supplier_delivers_item (SUPPLIERS_ID INTEGER, ITEMS_ID INTEGER) ;

@@ -66,7 +66,11 @@ Once connected you can perform some SQL query, update records, etc... Useful dur
 Also note that the testing project has code to test DB2 availability. See [Integration tests](https://github.com/ibm-cloud-architecture/refarch-integration-tests)
 
 ## Update the DB schema
-It may be needed to adapt the schema by adding new columns to one table. To do so, start the DB2 CLI.
+It may be needed to adapt the schema by adding new columns to one table. To do so, you can use Eclipse Database development perspective and connect to the DB and use SQL script editor.
+```
+alter table items add column  serialNumber VARCHAR(50);
+```
+For more information about the `alter` command for DB2 see the [knowledge center note.](https://www.ibm.com/support/knowledgecenter/en/SSEPEK_11.0.0/sqlref/src/tpc/db2z_sql_altertable.html)
 
 ## DB2 Reference material for knowledge acquisition
 * [Free e-book](http://publib.boulder.ibm.com/epubs/pdf/dsncrn01.pdf)
