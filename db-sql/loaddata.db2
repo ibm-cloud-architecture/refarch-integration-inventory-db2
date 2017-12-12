@@ -13,4 +13,7 @@ VALUES ('13401','Dayton Meat Chopper','Punched-card tabulating machines and time
 ('13412','Selectric Typewriter','Unveiled in 1961, the revolutionary Selectric typewriter eliminated the need for conventional type bars and movable carriages by using an innovative typing element on a head-and-rocker assembly, which, in turn, was mounted on a small carrier to move from left to right while typing.','2199.99','Selectric Typewriter','/api/image/selectric.jpg');
 COMMIT;
 
-
+INSERT INTO suppliers(id,name,status,type,city,state,zipcode)
+VALUES('1','IBM','ACTIVE','ORGANIZATION','Armonk','NY','10000'),
+('2','CASEINC','ACTIVE','ORGANIZATION','San Francisco','CA','94000')
+COMMIT;

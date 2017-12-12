@@ -9,6 +9,7 @@ create table items
  model VARCHAR(50),
  serialNumber VARCHAR(50),
  producttype VARCHAR(50),
+  quantity DECIMAL,
  CREATIONDATE TIMESTAMP,
  UPDATEDATE TIMESTAMP,
  PRIMARY KEY (id)
@@ -18,9 +19,13 @@ create table items
 create table inventory
 (
  id INTEGER NOT NULL, 
- item  INTEGER NOT NULL, 
+ itemId  INTEGER NOT NULL, 
+ supplierId  INTEGER NOT NULL, 
+ customerId  INTEGER NOT NULL, 
  site VARCHAR(50) NOT NULL, 
  quantity DECIMAL,
+ soldPrice DECIMAL(8,2),
+  cost DECIMAL(8,2),
  CREATIONDATE TIMESTAMP,
  UPDATEDATE TIMESTAMP,
  PRIMARY KEY (id)
@@ -39,6 +44,5 @@ CREATE TABLE SUPPLIERS (
     zipcode VARCHAR(10), 
     PRIMARY KEY (id)) 
 );
-CREATE TABLE supplier_delivers_item (SUPPLIERS_ID INTEGER, ITEMS_ID INTEGER) ;
 
 COMMIT;
