@@ -2,7 +2,13 @@
 This project is part of the 'IBM Integration Reference Architecture' suite, available at [https://github.com/ibm-cloud-architecture/refarch-integration](https://github.com/ibm-cloud-architecture/refarch-integration)
 
 ## Goals
-This project supports scripts to create DB2 inventory database and load it with 12 items related to old computers.
+This project supports scripts to create DB2 inventory database and load it with 12 items related to old computers. The Data model looks like the following diagram:
+
+![](docs/inventory-model.png)
+
+The ItemEntity is mapped to a ITEMS table to persist item information
+The SupplierEntity is mapped to the SUPPLIER table to persist information about the supplier delivering the item.
+The Inventory is mapped to INVENTORY table to persist item allocated per site. When a new item is added the supplier id is used as foreign key to the SUPPLIER table.
 
 ## DB2 Server Installation
 The following steps can be done manually to create a VM with REDHAT. We are using vmware vSphere center.
