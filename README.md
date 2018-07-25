@@ -1,8 +1,10 @@
 # DB2 Inventory Database
-This project is part of the 'IBM Integration Reference Architecture' suite, available at [https://github.com/ibm-cloud-architecture/refarch-integration](https://github.com/ibm-cloud-architecture/refarch-integration)
+This project is part of the 'IBM Integration Reference Architecture' suite, available at [https://github.com/ibm-cloud-architecture/refarch-integration](https://github.com/ibm-cloud-architecture/refarch-integration).
+This project represents on-premise deployment so you need a running DB2 server to install the database. 
+August 2018, we are reusing this project for a lift and shift to the IBM cloud. The tutorial can be read [here](docs/db2-cloud.md)
 
 ## Goals
-This project supports scripts to create DB2 inventory database and load it with 12 items related to old computers. The Data model looks like the following diagram:
+This project supports scripts to create DB2 `Inventory` database and load it with 12 items related to old computers. The Data model looks like the following diagram:
 
 ![](docs/inventory-model.png)
 
@@ -39,10 +41,12 @@ When a database is created, there are several objects created by default: table 
 git clone https://github.com/ibm-cloud-architecture/refarch-integration-inventory-db2.git
 ```
 ## Scripts
-The folder db-scripts includes shell scripts to create the INVDB and populate it.
+The folder db-scripts includes shell scripts to create the INVDB and populate it with 12 items. This script has to be executed on the DB2 server as it uses db2 CLI.
 ```
 $ createDB.sh
 ```
+
+The project [refarch-integration-tests](https://github.com/ibm-cloud-architecture/refarch-integration-tests) includes Java and nodejs code to test each component of Brown compute solution and specially DB2 Inventory DB: the scripts is testInventoryDB2.sh.
 
 ## DB2 command summary
 
