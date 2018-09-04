@@ -1,4 +1,4 @@
-# Lift and shift to DB2 on Cloud
+# Lift and Shift to DB2 on Cloud
 We are presenting the process to lift and shift the Inventory database to DB2 hosted service on IBM Cloud.
 
 ## Create a DB2 on Cloud instance
@@ -22,7 +22,7 @@ Now we are ready to use other tools to do the migration.
 
 ## Migrate  
 
-We are migrating to the most restrictive plan and will point out some of the limitations that drove our decisions and how you can decide differently if your plan does not have the same limitations.
+We are migrating to the most restrictive plan and will point out some of the limitations that drove our decisions and how you can decide differently if your plan does not have the same limitations. First we migrate using the native db2move, then the same migration is performed using the [Lift](https://lift.ng.bluemix.net/).
 
 ### Cataloging DB2 on Cloud
 
@@ -326,4 +326,228 @@ Number of rows committed    = 4
 The nice thing about IXF files is that they include the table structure. Our import commands created (or replaced) the table in the target. We're only allowed to use our schema so I removed references to schema in the import statements. Each import statement processes the local IXF file and translates it into the appropate SQL activity on the server - so our files are local to originating database and were not transferred as files. Instead the DDL and DML were executed over the SSL connection we defined earlier.
 
 That's it! Our (simple, tiny) data is now transferred over and applications can be re-pointed to the new environment.
+
+## Migrate Using Lift
+
+Lift is a feature-rich migration assistant that facilitates the copying of database objects from one source into a cloud environment. We only migrated the tables of interest from the Inventory database but other database objects including sequences, triggers, procedures, functions, auditpolicies, and views are supported. Lift performs the data migration in a series of steps, similar to using db2move.
+
+### Install Lift
+
+We installed Lift on the source database. It could also be installed on a completely separate environment, if desired. All Lift commands allow remote connections to both databases involved, when appropriate. 
+
+We added the lift binary to our default PATH variable and created a property file (lift.properties) with approprite settings for our environment:  
+
+```
+source-schema=
+source-database=
+source-user=
+source-password=
+source-host=
+source-database-port=
+source-database-type=
+target-user=
+target-password=
+target-host=
+target-schema=
+```
+
+### Copy DDL to Cloud
+
+We have to define the tables we are copying in the cloud environment. With Lift you can use the `ddl` sub-command to extract DDL from the source and apply it to the target. We ran `lift ddl --migrate --source-schema DB2INST1 --source-object ITEMS --properties-file lift.properties` to copy the ITEMS table. Note that our source schema was DB2INST1 and the target schema is locked to our username because of our plan. Schema names and object names are case sensitive at the command line. By default, DB2 names are in upper case.
+
+```
+[db2inst1@BrownAppServer bmx]$ lift ddl --migrate --source-schema DB2INST1 --source-object ITEMS --properties-file lift.properties
+Generating DDL statement(s) for specified database objects...
+Executing DDL statements for the specified database
+Running operation 'create' on object 'ITEMS' of type 'table' in schema 'VVB46996'
+Successfully ran 1 DDL statement(s).
+DDL statements were successfully executed against the target database.
+Database object migration operations finished.
+```
+
+### Extract Data Locally
+
+Data must be exported from the table. We exported all rows but it is possible to provide a where clause to, for example, extract new/updated rows if you are doing a staged migration. It is also possible to extract only certain columns. You can also specify what size the result files should be before creating another file for the extract. We used the simple case that simply dumps all the data:  
+
+```
+[db2inst1@BrownAppServer bmx]$ lift extract --properties-file lift.properties --source-schema DB2INST1 --source-table INVENTORY
+Extracting from table 'INVENTORY' to /home/db2inst1/bmx/DB2INST1.INVENTORY.csv
+
+[##########] Extracted 304 B
+Extracted 304 B (3 of 3 rows) from table 'INVENTORY' to /home/db2inst1/bmx/DB2INST1.INVENTORY.csv in 1 second(s) at an average rate of < 1 Mb/s
+```
+
+### Put the Extract in the Cloud
+
+The extracted files need to be copied to a local filesystem in the cloud. This is accomplished with the `put` command and it simply copies a local file to the cloud, optionally renaming it. The target filesystem is "flat". Multiple files can be "put" in one command and will result in preserved filenames (but not paths). Local files can be in the current working directory or absolute paths can be specified.
+
+```
+[db2inst1@BrownAppServer bmx]$ lift put --properties-file lift.properties --file /home/db2inst1/bmx/DB2INST1.INVENTORY.csv
+Putting file /home/db2inst1/bmx/DB2INST1.INVENTORY.csv (size 304B) at a maximum throughput of 500.00 Mb/s.
+[##########] Put 304/304 B at < 1 Mb/s (0 sec remain)
+Transferred file /home/db2inst1/bmx/DB2INST1.INVENTORY.csv in 2 seconds at average throughput of < 1 Mb/s.
+The file transfer completed successfully.
+```
+
+### Load the Cloud Table
+
+Now that the data is local to the Cloud instance it can be loaded. You can specify insert (default) to add new data or replace to empty the table first. There are several options in the case a file format other than something lift generated in the extract step is used.
+
+```
+[db2inst1@BrownAppServer bmx]$ lift load --properties-file lift.properties --filename DB2INST1.INVENTORY.csv --target-table INVENTORY --file-origin extract-db2
+Loading file DB2INST1.INVENTORY.csv into VVB46996.INVENTORY
+Loaded file DB2INST1.INVENTORY.csv into "VVB46996"."INVENTORY" in 3 seconds
+Load Id: 1534960210242
+Details
+  Rows loaded: 3
+  Rows skipped: 0
+  Rows rejected: 0
+  Rows deleted: 0
+```
+
+### Simple Lift Wrapper
+
+If four steps are too many you can use this script either as-is or as a starting point to customize your move. Save the code as a file on a system that has bash installed (ksh may also work). It accepts three arguments: `-f <property file>` to specify your lift property file, as above; `-s <schema>` to specify the case-sensitive source schema; `-t <table>` to specify the case-sensitive name of the table to move. Optionally you can specify `-m` to turn on the migration step, otherwise the script assumes you have already migrated the DDL.
+
+If any step encounters an error the script will stop.
+
+
+```
+#!/bin/bash
+
+PROP=
+SCHEMA=
+TABLE=
+MIGRATE=0
+
+usage()
+{
+  echo "Usage: $0 -f <property file> -s <schema> -t <table>"
+  echo " -f:    Provides the name of the lift.properties file"
+  echo " -s:    Provides the schema of the table to move. Case sensitive"
+  echo " -t:    Provides the name of the table to move. Case sensitive"
+  echo " -m:    Turns on the migrate of the DDL step"
+  echo ""
+  echo "The lift properties file must have at least: "
+  echo ""
+  cat <<EOUSAGE
+source-schema=
+source-database=
+source-user=
+source-password=
+source-host=
+source-database-port=
+source-database-type=
+target-user=
+target-password=
+target-host=
+target-schema=
+EOUSAGE
+
+}
+
+while getopts ":f:t:s:m" flag
+do
+  case $flag in
+    f) PROP=$OPTARG;;
+    s) SCHEMA=$OPTARG;;
+    t) TABLE=$OPTARG;;
+    m) MIGRATE=1;;
+    *) "echo $flag not recognized";usage;exit;;
+  esac
+done
+
+if [ "$PROP" == "" ]; then
+  echo "Property file required"
+  usage
+  exit
+else
+  if [ ! -f $PROP ]; then
+    echo "Property file not a file: $PROP"
+    usage
+    exit
+  fi
+fi
+if [ "$SCHEMA" == "" ]; then
+  echo "Schema name required"
+  usage
+  exit
+fi
+if [ "$TABLE" == "" ]; then
+  echo "Table name required"
+  usage
+  exit
+fi
+
+
+#Copy DDL
+if [ $MIGRATE -eq 1 ]; then
+  echo "copying DDL"
+  lift ddl --properties-file $PROP --migrate --source-schema $SCHEMA --source-object $TABLE
+  RC=$?
+  if [ $RC -ne 0 ]; then
+    echo "Migrate of the DDL for $TABLE failed, make sure the case is correct and the table exists. Check previous output for more information"
+    exit
+  fi
+fi
+#extract
+echo "starting extract"
+lift extract --properties-file $PROP --source-schema $SCHEMA --source-table $TABLE -f ${SCHEMA}.${TABLE}.csv --replace
+RC=$?
+if [ $RC -ne 0 ]; then
+  echo "Extract for $TABLE failed, make sure the case is correct and the table exists. Check previous output for more information"
+  exit
+fi
+#put
+echo "starting stage"
+lift put --properties-file $PROP --file ${SCHEMA}.${TABLE}.csv --replace
+RC=$?
+if [ $RC -ne 0 ]; then
+  echo "Staging of extract file for $TABLE failed, make sure the case is correct and the table exists. Check previous output for more information"
+  exit
+fi
+#load
+echo "starting load"
+lift load --properties-file $PROP --filename ${SCHEMA}.${TABLE}.csv --target-table $TABLE --file-origin extract-db2
+RC=$?
+if [ $RC -ne 0 ]; then
+  echo "Loading of extract file for $TABLE failed, make sure the case is correct and the table exists. Check previous output for more information"
+  exit
+fi
+echo "all done!"
+```
+
+Using this to migrate a table looks like this:
+
+```
+[db2inst1@BrownAppServer bmx]$ ./liftit -f lift.properties -s DB2INST1 -t SUPPLIERS -m
+copying DDL
+Generating DDL statement(s) for specified database objects...
+Executing DDL statements for the specified database
+Running operation 'create' on object 'SUPPLIERS' of type 'table' in schema 'VVB46996'
+Successfully ran 1 DDL statement(s).
+DDL statements were successfully executed against the target database.
+Database object migration operations finished.
+starting extract
+Extracting from table 'SUPPLIERS' to /home/db2inst1/bmx/DB2INST1.SUPPLIERS.csv
+
+[##########] Extracted 125 B
+Extracted 125 B (2 of 2 rows) from table 'SUPPLIERS' to /home/db2inst1/bmx/DB2INST1.SUPPLIERS.csv in 1 second(s) at an average rate of < 1 Mb/s
+starting stage
+Putting file /home/db2inst1/bmx/DB2INST1.SUPPLIERS.csv (size 125B) at a maximum throughput of 500.00 Mb/s.
+[##########] Put 125/125 B at < 1 Mb/s (0 sec remain)
+Transferred file /home/db2inst1/bmx/DB2INST1.SUPPLIERS.csv in 8 seconds at average throughput of < 1 Mb/s.
+The file transfer completed successfully.
+starting load
+Loading file DB2INST1.SUPPLIERS.csv into VVB46996.SUPPLIERS
+Loaded file DB2INST1.SUPPLIERS.csv into "VVB46996"."SUPPLIERS" in 1 seconds
+Load Id: 1534960210248
+Details
+  Rows loaded: 2
+  Rows skipped: 0
+  Rows rejected: 0
+  Rows deleted: 0
+all done!
+```
+
 
