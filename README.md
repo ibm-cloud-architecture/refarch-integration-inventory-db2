@@ -2,16 +2,27 @@
 This project is part of the 'IBM Integration Reference Architecture' suite, available at [https://github.com/ibm-cloud-architecture/refarch-integration](https://github.com/ibm-cloud-architecture/refarch-integration).
 This project represents on-premise deployment so you need a running DB2 server to install the database.
 
-Updated - August 2018, we are reusing this project for a [lift and shift of MQ, WAS and DB2 workloads to the IBM Cloud ](https://github.com/ibm-cloud-architecture/refarch-integration/blob/master/docs/toSaaS/readme.md) (Public) solution. The migrate DB2 database tutorial can be read [here](docs/db2-cloud.md).
+Updated - September 2018, we are reusing this project for a [lift and shift of MQ, WAS and DB2 workloads to the IBM Cloud ](https://github.com/ibm-cloud-architecture/refarch-integration/blob/master/docs/toSaaS/readme.md) (Public) solution. The migrate DB2 database tutorial can be read [here](docs/db2-cloud.md).
+## Table of Contents
+* [Project goals](#goals)
+* [On premise installation](#db2-server-installation)
+* [Lift and shift DB2 workload to IBM Cloud](docs/db2-cloud.md)
+* [Deploy DB2 to ICP for development](docs/db2-icp.md)
+* [Administer DB2 databases](#administer)
 
 ## Goals
-This project supports scripts to create DB2 `Inventory` database and load it with 12 items related to old computers. The Data model looks like the following diagram:
+This project supports scripts to create DB2 `Inventory` database and load it with 12 items related to old computers. And for customer table to support Customer churn demonstration.
+### For inventory DB
+The Data model looks like the following diagram:
 
 ![](docs/inventory-model.png)
 
 The ItemEntity is mapped to a ITEMS table to persist item information
 The SupplierEntity is mapped to the SUPPLIER table to persist information about the supplier delivering the item.
 The Inventory is mapped to INVENTORY table to persist item allocated per site. When a new item is added the supplier id is used as foreign key to the SUPPLIER table.
+
+### For Customer DB
+The model defines four main tables: customers, accounts and products, and a join table as customer may have multiple products. Customer has one account only. To simplify our life.
 
 ## DB2 Server Installation
 The following steps can be done manually to create a VM with REDHAT. We are using vmware vSphere center.
@@ -41,7 +52,8 @@ When a database is created, there are several objects created by default: table 
 ```
 git clone https://github.com/ibm-cloud-architecture/refarch-integration-inventory-db2.git
 ```
-## Scripts
+## Administer
+### Inventory
 The folder db-scripts includes shell scripts to create the INVDB and populate it with 12 items. This script has to be executed on the DB2 server as it uses db2 CLI.
 ```
 $ createDB.sh
@@ -49,7 +61,9 @@ $ createDB.sh
 
 The project [refarch-integration-tests](https://github.com/ibm-cloud-architecture/refarch-integration-tests) includes Java and nodejs code to test each component of Brown compute solution and specially DB2 Inventory DB: the scripts is testInventoryDB2.sh.
 
-## DB2 command summary
+### Customers
+
+### DB2 command summary
 
 |Command|Description|
 |-------|---------|
