@@ -6,7 +6,7 @@ echo $rows
 rm xx
 
 echo "Verify suppliers"
-db2 -x "select id,name from supplier" |wc -l >> xx
+db2 -x "select id,name from suppliers" |wc -l >> xx
 read rows < xx
 echo $rows
 rm xx

@@ -3,16 +3,21 @@ This project is part of the 'IBM Integration Reference Architecture' suite, avai
 This project represents on-premise deployment so you need a running DB2 server to install the database.
 
 Updated - September 2018, we are reusing this project for a [lift and shift of MQ, WAS and DB2 workloads to the IBM Cloud ](https://github.com/ibm-cloud-architecture/refarch-integration/blob/master/docs/toSaaS/readme.md) (Public) solution. The migrate DB2 database tutorial can be read [here](docs/db2-cloud.md).
+
 ## Table of Contents
 * [Project goals](#goals)
+* [Run locally with docker](#run-locally)
 * [On premise installation](#db2-server-installation)
 * [Lift and shift DB2 workload to IBM Cloud](docs/db2-cloud.md)
 * [Deploy DB2 to ICP for development](docs/db2-icp.md)
 * [Administer DB2 databases](#administer)
 
 ## Goals
+
 This project supports scripts to create DB2 `Inventory` database and load it with 12 items related to old computers. And for customer table to support Customer churn demonstration.
+
 ### For inventory DB
+
 The Data model looks like the following diagram:
 
 ![](docs/inventory-model.png)
@@ -22,9 +27,26 @@ The SupplierEntity is mapped to the SUPPLIER table to persist information about 
 The Inventory is mapped to INVENTORY table to persist item allocated per site. When a new item is added the supplier id is used as foreign key to the SUPPLIER table.
 
 ### For Customer DB
+
 The model defines four main tables: customers, accounts and products, and a join table as customer may have multiple products. Customer has one account only. To simplify our life.
 
+## Run Locally 
+
+We are providing a dockerfile to tune the ibmcom base db2express-c image and a set of scripts to prepare table and load data.
+```
+# Start the docker container
+$ ./rundb2docker.sh
+# change the user
+$ su - db2inst1
+# start db2
+[db2inst1@9f3200f453e4 ~]$ db2start
+# create the database
+db2inst1@9f3200f453e4 ~]$ cd browndb/db-sql/inventory
+db2inst1@9f3200f453e4 ~]$ ./createDB.sh
+```
+
 ## DB2 Server Installation
+
 The following steps can be done manually to create a VM with REDHAT. We are using vmware vSphere center.
 * Create a vm machine for a REDHAT 7 (64 bits) OS using ESXi 5.5  
 * Configure the virtual machine to start on RedHat .iso file (configure DVD to point to .iso file). Be sure to select connect at power on  
@@ -81,6 +103,7 @@ The project [refarch-integration-tests](https://github.com/ibm-cloud-architectur
 |db2 select id,name from items | select some columns and all rows for a given table|
 
 ## Verify DB2 is accessible
+
 Using Eclipse DataBase Development perspective, define a new connection using the jdbc driver which can be found at: [refarch-premsource-inventory-dal](https://github.com/ibm-cloud-architecture/refarch-integration-inventory-dal)/lib/db2jcc4.jar  
 
 ![Eclipse DB Connection](docs/db2-cx-eclipse.png)
@@ -98,10 +121,12 @@ alter table items add column  serialNumber VARCHAR(50);
 For more information about the `alter` command for DB2 see the [knowledge center note.](https://www.ibm.com/support/knowledgecenter/en/SSEPEK_11.0.0/sqlref/src/tpc/db2z_sql_altertable.html)
 
 ## Working on data
+
 * removing row:
 `delete from inventory where id = '531'`
 
 ## Common issues
+
 While updating row or insert new row in a table, like INVENTORY, you may get a SQLERROR = -668.  You may need to reorganize the table. Connect to the DB using eclipse database development perspective, use a SQL script and perform the command:
 `call ADMIN_CMD('REORG TABLE INVENTORY')`
 update should work.
@@ -109,3 +134,4 @@ update should work.
 ## DB2 Reference material for knowledge acquisition
 * [Free e-book](http://publib.boulder.ibm.com/epubs/pdf/dsncrn01.pdf)
 * [dw article](https://www.ibm.com/developerworks/data/newto/db2luw-getstarted.html)
+* [Considerations for building and deploying DB2 Docker containers](https://developer.ibm.com/articles/dm-1602-db2-docker-trs/)

@@ -15,5 +15,5 @@ COMMIT;
 
 INSERT INTO suppliers(id,name,status,type,city,state,zipcode)
 VALUES('1','IBM','ACTIVE','ORGANIZATION','Armonk','NY','10000'),
-('2','CASEINC','ACTIVE','ORGANIZATION','San Francisco','CA','94000')
+('2','CASEINC','ACTIVE','ORGANIZATION','San Francisco','CA','94000');
 COMMIT;

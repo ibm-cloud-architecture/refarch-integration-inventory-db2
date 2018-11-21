@@ -1,3 +1,5 @@
+
+connect to INVDB;
 create table items
 (
  id INTEGER NOT NULL,
@@ -42,7 +44,7 @@ CREATE TABLE SUPPLIERS (
  	state VARCHAR(50),
     street VARCHAR(255), 
     zipcode VARCHAR(10), 
-    PRIMARY KEY (id)) 
+    PRIMARY KEY (id)
 );
 
 COMMIT;

@@ -15,12 +15,12 @@ echo $rows
 rm xx
 if [[ $rows -eq 0 ]]; then
  echo "There is no data in customer DB, let add some..."
- db2 -tvf load-data.db2 -z mydb.log
-
-fi
-if [[ $rows -lt 5 ]];then
-  echo "You do not have all the records"
+ db2 -tvf loaddata.db2 -z mydb.log
 else 
-  echo "Good your db is up and populated"
+  if [[ $rows -lt 5 ]];then
+    echo "You do not have all the records"
+  else 
+    echo "Good your db is up and populated"
+  fi
 fi
 
