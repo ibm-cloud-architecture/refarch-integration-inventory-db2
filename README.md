@@ -60,7 +60,7 @@ db2inst1@9f3200f453e4 ~]$ cd browndb/db-sql/inventory
 db2inst1@9f3200f453e4 ~]$ ./createDB.sh
 ```
 
-So with all this context, you have now a prepared image that you can start using the script `undb2docker.sh` which in fact performs the following docker run:
+So with all this context, you have now a prepared image that you can start using the script `rundb2docker.sh` which in fact performs the following docker run:
 
 ```shell
 docker run --privileged=true --name db2 -p 50000:50000  -d ibmcase/browndb2  db2start
@@ -110,9 +110,11 @@ ID          NAME
   12 record(s) selected.
 ```
 
-From there you should be able to do the DB2 lift and shift scenario as describe in [this note](./docs/db2-cloud.md)
+From there you should be able to do the DB2 lift and shift scenario as describe in [this note.](./docs/db2-cloud.md)
 
 ### Using Vagrant
+
+We are working to define a unique vagrant file and supporting script to run DB2, MQ and WAS inside a single VM. This is documented in the integration project [here](https://github.com/ibm-cloud-architecture/refarch-integration/blob/master/vm/README.md)
 
 ## DB2 Server Installation
 
